@@ -1,0 +1,31 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "prettier", // Added Prettier plugin
+    "html"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:prettier/recommended", // Added Prettier recommended configuration
+    "plugin:svelte/recommended"
+  ],
+  "rules": {
+    "@typescript-eslint/naming-convention": "warn",
+    "@typescript-eslint/semi": "warn",
+    "curly": "warn",
+    "eqeqeq": "warn",
+    "no-throw-literal": "warn",
+    "semi": "warn",
+    "max-len": ["warn", { "code": 120 }],
+    "prettier/prettier": "warn", // Enabled Prettier rules
+    "comma-dangle": ["warn", "always-multiline"]
+  },
+  "ignorePatterns": ["out", "dist", "**/*.d.ts", "compiled-fw"]
+}
