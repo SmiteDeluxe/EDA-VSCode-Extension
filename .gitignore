@@ -89,3 +89,5 @@ typings/
 
 # Svelte build
 src/compiled-fw/
+
+dist/

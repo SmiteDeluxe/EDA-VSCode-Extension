@@ -2,8 +2,5 @@ import { Webview } from "vscode";
 import { FromExtensionMessage } from "messaging";
 
 export function postMessage(webview: Webview, message: FromExtensionMessage) {
-  webview.postMessage({
-    command: "setState",
-    value: message,
-  });
+  webview.postMessage(message);
 }
