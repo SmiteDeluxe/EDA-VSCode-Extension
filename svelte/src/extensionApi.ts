@@ -1,12 +1,12 @@
-import type { State } from "./interfaces";
+import type { State } from "../../types/types";
 
 export function setGlobalState(states: State[]) {
   window.injVscode.postMessage({
-    command: "setState",
+    command: "setGlobalState",
     value: states,
   });
 }
 
 export function createInfoToast(message: string) {
-  window.injVscode.postMessage({ command: "onInfo", value: message });
+  window.injVscode.postMessage({ command: "setInfo", value: message });
 }

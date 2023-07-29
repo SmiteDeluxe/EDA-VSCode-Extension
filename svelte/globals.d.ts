@@ -1,10 +1,10 @@
 import * as _vscode from "vscode";
-import type { State } from "./src/interfaces";
+import type { State, ToExtensionMessage } from "../types/messaging";
 
 declare global {
   interface Window {
     injVscode: {
-      postMessage: (message: { command: string; value: any }) => void;
+      postMessage: (message: ToExtensionMessage) => void;
       // getState: () => State[];
       // setState: (state: State[]) => void;
     };

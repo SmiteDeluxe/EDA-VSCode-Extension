@@ -7,6 +7,10 @@
 		],
 		"sourceMap": true,
 		"rootDir": ".",
-		"strict": true
+		"strict": true,
+		"baseUrl": ".",
+		"paths": {
+		  "*": ["../types/*", "*"]
+		}
 	}
 }

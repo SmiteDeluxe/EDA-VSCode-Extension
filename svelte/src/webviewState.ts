@@ -1,5 +1,5 @@
-// state.ts
-import type { State } from "./interfaces";
+import type { FromExtensionMessage } from "../../types/messaging";
+import type { State } from "../../types/types";
 import * as extensionApi from "./extensionApi";
 import { writable, derived, get } from "svelte/store";
 
@@ -26,9 +26,9 @@ function findCurrentState(selectedText?: string) {
 }
 
 window.addEventListener("message", (event) => {
-  const message = event.data;
+  const message = event.data as FromExtensionMessage;
   switch (message.command) {
-    case "setState":
+    case "setWebviewState":
       allStates.set(message.value ?? []);
       findCurrentState(window.selectedText);
       break;

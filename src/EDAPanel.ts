@@ -1,11 +1,14 @@
 import * as vscode from "vscode";
 import { getNonce } from "./getNonce";
+import { FromExtensionMessage, ToExtensionMessage } from "messaging";
+import * as webviewApi from "./webviewApi";
+import { State } from "types";
 
-export class HelloWorldPanel {
+export class EDAPanel {
   /**
    * Track the currently panel. Only allow a single panel to exist at a time.
    */
-  public static currentPanel: HelloWorldPanel | undefined;
+  public static currentPanel: EDAPanel | undefined;
   public static context: vscode.ExtensionContext;
 
   public static readonly viewType = "hello-world";
@@ -17,58 +20,53 @@ export class HelloWorldPanel {
   private _column: vscode.ViewColumn | undefined;
 
   public static createOrShow(extensionUri: vscode.Uri, context: vscode.ExtensionContext, selectedText?: string) {
-    HelloWorldPanel.context = context;
+    EDAPanel.context = context;
 
     const column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : undefined;
 
     // If we already have a panel, show it.
-    if (HelloWorldPanel.currentPanel) {
-      HelloWorldPanel.currentPanel._panel.reveal(HelloWorldPanel.currentPanel._column);
-      HelloWorldPanel.currentPanel._selectedText = selectedText;
-      HelloWorldPanel.currentPanel._update();
+    if (EDAPanel.currentPanel) {
+      EDAPanel.currentPanel._panel.reveal(EDAPanel.currentPanel._column);
+      EDAPanel.currentPanel._selectedText = selectedText;
+      EDAPanel.currentPanel._update();
       // Otherwise fired in 'onDidChangeViewState' listener
-      if (HelloWorldPanel.currentPanel._panel.visible) {
-        HelloWorldPanel.currentPanel._panel.webview.postMessage({
-          command: "setState",
-          value: HelloWorldPanel.context.globalState.get("webviewState"),
+      if (EDAPanel.currentPanel._panel.visible) {
+        webviewApi.postMessage(EDAPanel.currentPanel._panel.webview, {
+          command: "setWebviewState",
+          value: EDAPanel.context.globalState.get("webviewState") as State[],
         });
       }
       return;
     }
 
     // Otherwise, create a new panel.
-    const panel = vscode.window.createWebviewPanel(
-      HelloWorldPanel.viewType,
-      "EDA Tool",
-      column || vscode.ViewColumn.One,
-      {
-        // Enable javascript in the webview
-        enableScripts: true,
+    const panel = vscode.window.createWebviewPanel(EDAPanel.viewType, "EDA Tool", column || vscode.ViewColumn.One, {
+      // Enable javascript in the webview
+      enableScripts: true,
 
-        // And restrict the webview to only loading content from our extension's `media` directory.
-        localResourceRoots: [
-          vscode.Uri.joinPath(extensionUri, "media"),
-          vscode.Uri.joinPath(extensionUri, "src", "compiled-fw"),
-        ],
-      },
-    );
+      // And restrict the webview to only loading content from our extension's `media` directory.
+      localResourceRoots: [
+        vscode.Uri.joinPath(extensionUri, "media"),
+        vscode.Uri.joinPath(extensionUri, "src", "compiled-fw"),
+      ],
+    });
 
-    HelloWorldPanel.currentPanel = new HelloWorldPanel(panel, extensionUri, selectedText);
-    HelloWorldPanel.currentPanel._column = column;
-    panel.webview.postMessage({
-      command: "setState",
-      value: HelloWorldPanel.context.globalState.get("webviewState"),
+    EDAPanel.currentPanel = new EDAPanel(panel, extensionUri, selectedText);
+    EDAPanel.currentPanel._column = column;
+    webviewApi.postMessage(panel.webview, {
+      command: "setWebviewState",
+      value: EDAPanel.context.globalState.get("webviewState") as State[],
     });
   }
 
   public static kill() {
     console.log("kill");
-    HelloWorldPanel.currentPanel?.dispose();
-    HelloWorldPanel.currentPanel = undefined;
+    EDAPanel.currentPanel?.dispose();
+    EDAPanel.currentPanel = undefined;
   }
 
   public static revive(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
-    HelloWorldPanel.currentPanel = new HelloWorldPanel(panel, extensionUri);
+    EDAPanel.currentPanel = new EDAPanel(panel, extensionUri);
   }
 
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, selectedText?: string) {
@@ -87,9 +85,9 @@ export class HelloWorldPanel {
       const panel = e.webviewPanel;
       if (panel.visible) {
         this._column = panel.viewColumn;
-        panel.webview.postMessage({
-          command: "setState",
-          value: HelloWorldPanel.context.globalState.get("webviewState"),
+        webviewApi.postMessage(panel.webview, {
+          command: "setWebviewState",
+          value: EDAPanel.context.globalState.get("webviewState") as State[],
         });
       }
     });
@@ -97,7 +95,7 @@ export class HelloWorldPanel {
 
   public dispose() {
     console.log("dispose");
-    HelloWorldPanel.currentPanel = undefined;
+    EDAPanel.currentPanel = undefined;
 
     // Clean up our resources
     this._panel.dispose();
@@ -114,27 +112,27 @@ export class HelloWorldPanel {
     const webview = this._panel.webview;
 
     this._panel.webview.html = this._getHtmlForWebview(webview);
-    webview.onDidReceiveMessage(async (data) => {
+    webview.onDidReceiveMessage(async (data: ToExtensionMessage) => {
       switch (data.command) {
-        case "onInfo": {
+        case "setInfo": {
           if (!data.value) {
             return;
           }
           vscode.window.showInformationMessage(data.value);
           break;
         }
-        case "onError": {
+        case "setError": {
           if (!data.value) {
             return;
           }
           vscode.window.showErrorMessage(data.value);
           break;
         }
-        case "setState": {
+        case "setGlobalState": {
           if (!data.value) {
             return;
           }
-          HelloWorldPanel.context.globalState.update("webviewState", data.value);
+          EDAPanel.context.globalState.update("webviewState", data.value);
         }
       }
     });

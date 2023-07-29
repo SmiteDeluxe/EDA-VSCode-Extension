@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
-import { HelloWorldPanel } from "./SwiperPanel";
+import { EDAPanel } from "./EDAPanel";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -15,7 +15,7 @@ export function activate(context: vscode.ExtensionContext) {
   // The commandId parameter must match the command field in package.json
   context.subscriptions.push(
     vscode.commands.registerCommand("eda-test01.runEda", () => {
-      HelloWorldPanel.createOrShow(context.extensionUri, context);
+      EDAPanel.createOrShow(context.extensionUri, context);
     }),
   );
 
@@ -35,7 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
         return;
       }
 
-      HelloWorldPanel.createOrShow(context.extensionUri, context, newSelectedText);
+      EDAPanel.createOrShow(context.extensionUri, context, newSelectedText);
     }),
   );
 
@@ -48,9 +48,9 @@ export function activate(context: vscode.ExtensionContext) {
         if (range) {
           const newSelectedText = editor.document.getText(range);
           // TODO see if word a table
-          HelloWorldPanel.createOrShow(context.extensionUri, context, newSelectedText);
+          EDAPanel.createOrShow(context.extensionUri, context, newSelectedText);
         } else {
-          HelloWorldPanel.createOrShow(context.extensionUri, context, undefined);
+          EDAPanel.createOrShow(context.extensionUri, context, undefined);
         }
       } else {
         vscode.window.showErrorMessage("No ative text editor!");
@@ -61,8 +61,8 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand("eda-test01.refreshWebview", () => {
-      HelloWorldPanel.kill();
-      HelloWorldPanel.createOrShow(context.extensionUri, context);
+      EDAPanel.kill();
+      EDAPanel.createOrShow(context.extensionUri, context);
       setTimeout(() => {
         vscode.commands.executeCommand("workbench.action.webview.openDeveloperTools");
       }, 100);
