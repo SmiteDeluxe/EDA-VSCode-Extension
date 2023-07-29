@@ -26,7 +26,7 @@ interface ToExtensionSetErrorMessage extends ToExtensionCommandMessage {
 export type ToExtensionMessage = ToExtensionSetInfoMessage | ToExtensionSetStateMessage | ToExtensionSetErrorMessage;
 
 // From extension
-type FromExtensionCommand = "setGlobalState" | "setInfo" | "setError";
+type FromExtensionCommand = "setWebviewState";
 
 interface FromExtensionCommandMessage {
   command: FromExtensionCommand;

@@ -91,3 +91,11 @@ typings/
 src/compiled-fw/
 
 dist/
+
+flask/build/
+
+*.spec
+
+flask/python-mini-server/__pycache__/
+
+src/compiled-mini-server/

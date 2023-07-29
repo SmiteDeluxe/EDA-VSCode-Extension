@@ -1,5 +1,6 @@
 <script lang="ts">
   import Child from "./components/Child.svelte";
+  import ServerCaller from "./components/ServerCaller.svelte";
   import { currentState, allStates } from "./webviewState";
 
   function resetAllState() {
@@ -21,6 +22,8 @@
   </p>
   <button on:click={() => resetAllState()}>reset state</button>
   <div class="rest">
+    <hr />
+    <ServerCaller />
     <hr />
     <Child />
   </div>

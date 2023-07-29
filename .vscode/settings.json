@@ -12,5 +12,9 @@
   "typescript.tsc.autoDetect": "off",
   "editor.formatOnSave": true,
   "editor.formatOnPaste": false,
-  "editor.codeActionsOnSave": {}
+  "editor.codeActionsOnSave": {},
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "python.formatting.provider": "none"
 }

@@ -3,7 +3,7 @@ import type { State } from "../../types/types";
 import * as extensionApi from "./extensionApi";
 import { writable, derived, get } from "svelte/store";
 
-// Define the stores
+// Define the stores, current state to default in case the extension never calls setWebviewState( Shouldn't happen)
 let currentState = writable<State | undefined>({ selectedText: window.selectedText, randomText: "" });
 let allStates = writable<State[]>([]);
 
@@ -25,6 +25,7 @@ function findCurrentState(selectedText?: string) {
   }
 }
 
+// This should be fired immediately whenever the panel is created or made visible again
 window.addEventListener("message", (event) => {
   const message = event.data as FromExtensionMessage;
   switch (message.command) {

@@ -1,7 +1,11 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
+import * as cp from "child_process";
 import { EDAPanel } from "./EDAPanel";
+import path = require("path");
+
+let pythonMiniServer: cp.ChildProcessWithoutNullStreams;
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -10,9 +14,23 @@ export function activate(context: vscode.ExtensionContext) {
   // This line of code will only be executed once when your extension is activated
   console.log('Congratulations, your extension "eda-test01" is now active!');
 
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with registerCommand
-  // The commandId parameter must match the command field in package.json
+  // Start Python Mini Server
+  pythonMiniServer = cp.spawn(path.join(context.extensionUri.fsPath, "src/compiled-mini-server/main"));
+  (["stdout", "stderr"] as const).forEach((stream) => {
+    pythonMiniServer[stream].on("data", (data: Buffer) => {
+      let output = data.toString();
+      if (stream === "stdout") {
+        console.log(`PMS OUTPUT: ${output}`);
+      } else {
+        // Python/Flask default logs to stderr it seems
+        console.log(`PMS OUTPUT (Alleged error): ${output}`);
+      }
+    });
+  });
+  pythonMiniServer.on("close", (code) => {
+    console.error(`PMS process exited with code ${code}`);
+  });
+
   context.subscriptions.push(
     vscode.commands.registerCommand("eda-test01.runEda", () => {
       EDAPanel.createOrShow(context.extensionUri, context);
@@ -73,5 +91,6 @@ export function activate(context: vscode.ExtensionContext) {
 // This method is called when your extension is deactivated
 export function deactivate() {
   console.log("Deactivated");
+  pythonMiniServer.kill();
   return;
 }
