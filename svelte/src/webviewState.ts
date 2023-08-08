@@ -38,7 +38,6 @@ window.addEventListener("message", (event) => {
         GetJsonTable(window.selectedText)
           .then((table) => currentState.set({ selectedText: window.selectedText, randomText: "", table: table }))
           .catch((error) => {
-            console.log(error);
             extensionApi.createErrorToast(error.message);
           });
       }

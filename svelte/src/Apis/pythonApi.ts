@@ -2,22 +2,28 @@ import type { Table } from "../../../types/types";
 
 export async function GetHtmlTable(): Promise<string> {
   try {
-    const responseText = await (await fetch("http://127.0.0.1:5000/TableAsHtml", { method: "GET" })).text();
-    console.log(responseText);
+    const response = await fetch("http://127.0.0.1:5000/TableAsHtml", { method: "GET" });
+    const responseText = await response.text();
+    if (!response.ok) throw new Error(responseText);
+
     return responseText;
   } catch (error) {
     console.error(error);
-    return "";
+    throw new Error(`Could not get Table`);
   }
 }
 
 export async function GetJsonTable(tableName: string): Promise<Table> {
   try {
-    const responseText = await (
-      await fetch("http://127.0.0.1:5000/TableAsJson?" + new URLSearchParams({ tableName: tableName }), {
+    const response = await await fetch(
+      "http://127.0.0.1:5000/TableAsJson?" + new URLSearchParams({ tableName: tableName }),
+      {
         method: "GET",
-      })
-    ).text();
+      },
+    );
+    const responseText = await response.text();
+    if (!response.ok) throw new Error(responseText);
+
     let table: Table = { columns: [] };
     for (const column of Object.entries(JSON.parse(responseText))) {
       table.columns.push({
@@ -28,6 +34,6 @@ export async function GetJsonTable(tableName: string): Promise<Table> {
     return table;
   } catch (error) {
     console.error(error);
-    throw new Error(`Could not get Table ${tableName}`);
+    throw new Error(`Could not get Table "${tableName}"`);
   }
 }
