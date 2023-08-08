@@ -105,3 +105,35 @@
   textarea::placeholder {
     color: var(--vscode-input-placeholderForeground);
   }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--vscode-editor-foreground);
+    background-color: var(--vscode-editor-background);
+  }
+  
+  table th,
+  table td {
+    border: 1px solid var(--vscode-editor-lineHighlightBorder);
+    padding: 8px 12px;
+  }
+  
+  table th {
+    background-color: var(--vscode-editor-groupHeaderBackground);
+    color: var(--vscode-editor-foreground);
+    text-align: left;
+  }
+  
+  table tr:nth-child(even) {
+    background-color: var(--vscode-editor-lineHighlightBackground);
+  }
+  
+  table tr:hover {
+    background-color: var(--vscode-editor-hoverHighlightBackground);
+  }
+  
+  table a {
+    color: var(--vscode-textLink-foreground);
+  }
+  

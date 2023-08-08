@@ -1,5 +1,5 @@
-<script>
-  import * as extensionApi from "../extensionApi";
+<script lang="ts">
+  import * as extensionApi from "../Apis/extensionApi";
 </script>
 
 <button

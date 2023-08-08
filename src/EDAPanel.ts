@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { getNonce } from "./getNonce";
 import { FromExtensionMessage, ToExtensionMessage } from "messaging";
-import * as webviewApi from "./webviewApi";
+import * as webviewApi from "./Apis/webviewApi";
 import { State } from "types";
 
 export class EDAPanel {

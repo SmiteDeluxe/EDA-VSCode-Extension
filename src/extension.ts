@@ -14,6 +14,7 @@ export function activate(context: vscode.ExtensionContext) {
   // This line of code will only be executed once when your extension is activated
   console.log('Congratulations, your extension "eda-test01" is now active!');
 
+  let pythonServerStarted = false;
   // Start Python Mini Server
   pythonMiniServer = cp.spawn(path.join(context.extensionUri.fsPath, "src/compiled-mini-server/main"));
   (["stdout", "stderr"] as const).forEach((stream) => {
@@ -21,24 +22,41 @@ export function activate(context: vscode.ExtensionContext) {
       let output = data.toString();
       if (stream === "stdout") {
         console.log(`PMS OUTPUT: ${output}`);
+        if (output.includes("Running on")) {
+          pythonServerStarted = true;
+        }
       } else {
         // Python/Flask default logs to stderr it seems
         console.log(`PMS OUTPUT (Alleged error): ${output}`);
+        if (output.includes("Running on")) {
+          pythonServerStarted = true;
+        }
       }
     });
   });
   pythonMiniServer.on("close", (code) => {
+    pythonServerStarted = false;
     console.error(`PMS process exited with code ${code}`);
   });
 
+  const registerCommandWithCheck = (commandId: string, callback: (...args: any[]) => any) => {
+    return vscode.commands.registerCommand(commandId, (...args: any[]) => {
+      if (!pythonServerStarted) {
+        vscode.window.showErrorMessage("Extension not fully started yet.");
+        return;
+      }
+      return callback(...args);
+    });
+  };
+
   context.subscriptions.push(
-    vscode.commands.registerCommand("eda-test01.runEda", () => {
+    registerCommandWithCheck("eda-test01.runEda", () => {
       EDAPanel.createOrShow(context.extensionUri, context);
     }),
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("eda-test01.runEdaFromTable", () => {
+    registerCommandWithCheck("eda-test01.runEdaFromTable", () => {
       const { activeTextEditor } = vscode.window;
 
       if (!activeTextEditor) {
@@ -58,7 +76,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("eda-test01.runEdaFromContext", () => {
+    registerCommandWithCheck("eda-test01.runEdaFromContext", () => {
       const editor = vscode.window.activeTextEditor;
       if (editor) {
         const position = editor.selection.active;

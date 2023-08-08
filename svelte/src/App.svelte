@@ -1,6 +1,7 @@
 <script lang="ts">
   import Child from "./components/Child.svelte";
   import ServerCaller from "./components/ServerCaller.svelte";
+  import TableView from "./components/TableView.svelte";
   import { currentState, allStates } from "./webviewState";
 
   function resetAllState() {
@@ -21,6 +22,8 @@
     {JSON.stringify($allStates.filter((as) => as.selectedText !== $currentState.selectedText).concat([$currentState]))}
   </p>
   <button on:click={() => resetAllState()}>reset state</button>
+  <hr />
+  <TableView />
   <div class="rest">
     <hr />
     <ServerCaller />
