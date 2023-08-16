@@ -6,10 +6,11 @@ authors = ["Jonas Bothin <smitedeluxe@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.10,<3.13"
 flask = "^2.3.2"
 flask-cors = "^4.0.0"
 safe-ds = "^0.15.0"
+pyinstaller = "^5.13.0"
 
 
 [build-system]
