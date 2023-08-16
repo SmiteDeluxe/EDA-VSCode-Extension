@@ -4,8 +4,10 @@ import * as vscode from "vscode";
 import * as cp from "child_process";
 import { EDAPanel } from "./EDAPanel";
 import path = require("path");
+import findFirstFreePort from "./findFirstFreePort";
 
 let pythonMiniServer: cp.ChildProcessWithoutNullStreams;
+let pythonPort = 5000;
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -15,29 +17,39 @@ export function activate(context: vscode.ExtensionContext) {
   console.log('Congratulations, your extension "eda-test01" is now active!');
 
   let pythonServerStarted = false;
-  // Start Python Mini Server
-  pythonMiniServer = cp.spawn(path.join(context.extensionUri.fsPath, "src/compiled-mini-server/main"));
-  (["stdout", "stderr"] as const).forEach((stream) => {
-    pythonMiniServer[stream].on("data", (data: Buffer) => {
-      let output = data.toString();
-      if (stream === "stdout") {
-        console.log(`PMS OUTPUT: ${output}`);
-        if (output.includes("Running on")) {
-          pythonServerStarted = true;
-        }
-      } else {
-        // Python/Flask default logs to stderr it seems
-        console.log(`PMS OUTPUT (Alleged error): ${output}`);
-        if (output.includes("Running on")) {
-          pythonServerStarted = true;
-        }
-      }
-    });
+  // Find first free port from 5000 onward
+  findFirstFreePort(5000).then(port => {
+    if (port !== -1) {
+      pythonPort = port;
+
+      // Start Python Mini Server
+      pythonMiniServer = cp.spawn(path.join(context.extensionUri.fsPath, "src/compiled-mini-server/main"),['--port', pythonPort.toString()]);
+      (["stdout", "stderr"] as const).forEach((stream) => {
+        pythonMiniServer[stream].on("data", (data: Buffer) => {
+          let output = data.toString();
+          if (stream === "stdout") {
+            console.log(`PMS OUTPUT: ${output}`);
+            if (output.includes("Running on")) {
+              pythonServerStarted = true;
+            }
+          } else {
+            // Python/Flask default logs to stderr it seems
+            console.log(`PMS OUTPUT (Alleged error): ${output}`);
+            if (output.includes("Running on")) {
+              pythonServerStarted = true;
+            }
+          }
+        });
+      });
+      pythonMiniServer.on("close", (code) => {
+        pythonServerStarted = false;
+        console.error(`PMS process exited with code ${code}`);
+      });
+    } else {
+        vscode.window.showErrorMessage('No free ports found for the python server.');
+    }
   });
-  pythonMiniServer.on("close", (code) => {
-    pythonServerStarted = false;
-    console.error(`PMS process exited with code ${code}`);
-  });
+  
 
   const registerCommandWithCheck = (commandId: string, callback: (...args: any[]) => any) => {
     return vscode.commands.registerCommand(commandId, (...args: any[]) => {
@@ -51,7 +63,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     registerCommandWithCheck("eda-test01.runEda", () => {
-      EDAPanel.createOrShow(context.extensionUri, context);
+      EDAPanel.createOrShow(context.extensionUri, context, undefined, pythonPort);
     }),
   );
 
@@ -71,7 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
         return;
       }
 
-      EDAPanel.createOrShow(context.extensionUri, context, newSelectedText);
+      EDAPanel.createOrShow(context.extensionUri, context, newSelectedText, pythonPort);
     }),
   );
 
@@ -84,9 +96,9 @@ export function activate(context: vscode.ExtensionContext) {
         if (range) {
           const newSelectedText = editor.document.getText(range);
           // TODO see if word a table
-          EDAPanel.createOrShow(context.extensionUri, context, newSelectedText);
+          EDAPanel.createOrShow(context.extensionUri, context, newSelectedText, pythonPort);
         } else {
-          EDAPanel.createOrShow(context.extensionUri, context, undefined);
+          EDAPanel.createOrShow(context.extensionUri, context, undefined, pythonPort);
         }
       } else {
         vscode.window.showErrorMessage("No ative text editor!");

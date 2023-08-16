@@ -17,9 +17,10 @@ export class EDAPanel {
   private readonly _extensionUri: vscode.Uri;
   private _disposables: vscode.Disposable[] = [];
   private _selectedText: string | undefined;
+  private _pythonServerPort: number = 5000;
   private _column: vscode.ViewColumn | undefined;
 
-  public static createOrShow(extensionUri: vscode.Uri, context: vscode.ExtensionContext, selectedText?: string) {
+  public static createOrShow(extensionUri: vscode.Uri, context: vscode.ExtensionContext, selectedText?: string, pythonServerPort = 5000) {
     EDAPanel.context = context;
 
     const column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : undefined;
@@ -28,6 +29,7 @@ export class EDAPanel {
     if (EDAPanel.currentPanel) {
       EDAPanel.currentPanel._panel.reveal(EDAPanel.currentPanel._column);
       EDAPanel.currentPanel._selectedText = selectedText;
+      EDAPanel.currentPanel._pythonServerPort = pythonServerPort;
       EDAPanel.currentPanel._update();
       // Otherwise fired in 'onDidChangeViewState' listener
       if (EDAPanel.currentPanel._panel.visible) {
@@ -51,7 +53,7 @@ export class EDAPanel {
       ],
     });
 
-    EDAPanel.currentPanel = new EDAPanel(panel, extensionUri, selectedText);
+    EDAPanel.currentPanel = new EDAPanel(panel, extensionUri, selectedText, pythonServerPort);
     EDAPanel.currentPanel._column = column;
     webviewApi.postMessage(panel.webview, {
       command: "setWebviewState",
@@ -69,10 +71,11 @@ export class EDAPanel {
     EDAPanel.currentPanel = new EDAPanel(panel, extensionUri);
   }
 
-  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, selectedText?: string) {
+  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, selectedText?: string, pythonServerPort = 5000) {
     this._panel = panel;
     this._extensionUri = extensionUri;
     this._selectedText = selectedText;
+    this._pythonServerPort = pythonServerPort;
 
     // Set the webview's initial html content
     this._update();
@@ -168,6 +171,7 @@ export class EDAPanel {
       <script nonce="${nonce}">
         window.injVscode = acquireVsCodeApi();
         window.selectedText = "${this._selectedText}" === "undefined" ? undefined : "${this._selectedText}";
+        window.pythonServerPort = ${this._pythonServerPort};
       </script>
     </head>
     <body>

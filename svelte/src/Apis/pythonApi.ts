@@ -2,7 +2,7 @@ import type { Table } from "../../../types/types";
 
 export async function GetHtmlTable(): Promise<string> {
   try {
-    const response = await fetch("http://127.0.0.1:5000/TableAsHtml", { method: "GET" });
+    const response = await fetch("http://127.0.0.1:" + window.pythonServerPort + "/TableAsHtml", { method: "GET" });
     const responseText = await response.text();
     if (!response.ok) throw new Error(responseText);
 
@@ -16,7 +16,7 @@ export async function GetHtmlTable(): Promise<string> {
 export async function GetJsonTable(tableName: string): Promise<Table> {
   try {
     const response = await await fetch(
-      "http://127.0.0.1:5000/TableAsJson?" + new URLSearchParams({ tableName: tableName }),
+      "http://127.0.0.1:" + window.pythonServerPort + "/TableAsJson?" + new URLSearchParams({ tableName: tableName }),
       {
         method: "GET",
       },

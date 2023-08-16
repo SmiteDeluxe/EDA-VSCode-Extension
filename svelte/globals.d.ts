@@ -9,5 +9,6 @@ declare global {
       // setState: (state: State[]) => void;
     };
     selectedText: string;
+    pythonServerPort: number;
   }
 }
